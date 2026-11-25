@@ -17,8 +17,8 @@ const server = http.createServer((request, response) => {
 
 
     const staticFiles = {
-        "css/style.css": { file: "style.css", contentType: "text/css; charset=utf-8" },
-        "js/script.js": { file: "script.js", contentType: "text/javascript; charset=utf-8" },
+        "style.css": { file: "css/style.css", contentType: "text/css; charset=utf-8" },
+        "script.js": { file: "js/script.js", contentType: "text/javascript; charset=utf-8" },
     };
 
 
@@ -41,7 +41,7 @@ const server = http.createServer((request, response) => {
     }
 
 
-    const url = new URL(request.url, "http://localhost:3000");
+    const url = new URL(request.url, "http://localhost:8080");
 
     if (request.method === "GET" && url.pathname === "/") {
         fs.readFile(path.join(__dirname, "index.html"), (error, content) => {
@@ -61,6 +61,6 @@ const server = http.createServer((request, response) => {
     response.end("Nincs ilyen útvonal.");
 });
 
-server.listen(3000, "127.0.0.1", () => {
-    console.log("A szerver fut: http://127.0.0.1:3000");
+server.listen(8080, "127.0.0.1", () => {
+    console.log("A szerver fut: http://127.0.0.1:8080");
 });
