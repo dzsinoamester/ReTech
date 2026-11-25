@@ -1,10 +1,21 @@
 body{
     background-color: black;
+    font-family: 'Inter Mono One';
 }
 
 .navbar{
-    background: #ffffff;
-    margin: 30px 80px 0px 80px;
+    background: #fffefe;
     padding: 15px;
-    border-radius: 300px;
+}
+
+.center{
+    margin: auto;
+}
+
+.nav-link{
+    color: black;
+}
+
+.nav-link:active{
+    color: gray;
 }
