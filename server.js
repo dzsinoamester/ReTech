@@ -19,6 +19,8 @@ const server = http.createServer((request, response) => {
     const staticFiles = {
         "/style.css": { file: "css/style.css", contentType: "text/css; charset=utf-8" },
         "/script.js": { file: "js/script.js", contentType: "text/javascript; charset=utf-8" },
+        "/assets/img/logo_withoutbg.png": { file: "assets/img/logo_withoutbg.png", contentType: "image/png"
+        }
     };
 
 
@@ -56,7 +58,7 @@ const server = http.createServer((request, response) => {
         });
         return;
     }
-
+    
     if (request.method === "GET" && url.pathname === ("/api/products")) {
         response.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
         response.end(JSON.stringify(products));
