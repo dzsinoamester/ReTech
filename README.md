@@ -1,2 +1,2 @@
 # ReTech
-Kalla Dzsínó és Vincze Balázs
+Kalla Dzsínó Alex és Vincze Balázs
