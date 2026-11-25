@@ -17,8 +17,8 @@ const server = http.createServer((request, response) => {
 
 
     const staticFiles = {
-        "style.css": { file: "css/style.css", contentType: "text/css; charset=utf-8" },
-        "script.js": { file: "js/script.js", contentType: "text/javascript; charset=utf-8" },
+        "/style.css": { file: "css/style.css", contentType: "text/css; charset=utf-8" },
+        "/script.js": { file: "js/script.js", contentType: "text/javascript; charset=utf-8" },
     };
 
 
@@ -54,6 +54,45 @@ const server = http.createServer((request, response) => {
             response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
             response.end(content);
         });
+        return;
+    }
+
+    if (request.method === "GET" && url.pathname === ("/api/products")) {
+        response.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+        response.end(JSON.stringify(products));
+        return;
+    }
+
+    if (request.method === "GET" && url.pathname.startsWith("/api/orderby/")) {
+
+        let sortbyname = 'name-asc';
+        let priceasc = 'price-asc';
+        let pricedesc = 'price-desc';
+        const split = url.pathname.split('/');
+        if (sort == 'name-asc') {
+            products.sort((a, b) => {
+                if (a.name < b.name) {
+                    return -1;
+                }
+                if (a.name > b.name) {
+                    return 1;
+                }
+                if (b.name === a.name) {
+                    return 0;
+                }
+            });
+        }
+
+        if (priceasc == 'price-asc') {
+            products.sort((a, b) => a.price - b.price);
+        }
+
+        if (pricedesc == 'price-desc') {
+            products.sort((a, b) => b.price - a.price);
+        }
+
+        response.writeHead(200, { "Content-Type": "charset=utf-8" });
+        response.end();
         return;
     }
 
