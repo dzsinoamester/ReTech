@@ -232,7 +232,12 @@ const server = http.createServer((request, response) => {
     const staticFiles = {
         "/style.css": { file: "css/style.css", contentType: "text/css; charset=utf-8" },
         "/script.js": { file: "js/script.js", contentType: "text/javascript; charset=utf-8" },
+        "/assets/img/logo_withoutbg_blacktext.png": { file: "assets/img/logo_withoutbg_blacktext.png", contentType: "image/png" },
+        "/js/script.js": { file: "js/script.js", contentType: "text/javascript; charset=utf-8" }
+
     };
+
+
 
 
     const staticFile = staticFiles[request.url];
@@ -256,6 +261,40 @@ const server = http.createServer((request, response) => {
 
     const url = new URL(request.url, "http://localhost:8080");
 
+    // ADDED: serve every file inside the /assets/ folder (logo, carousel images, ...)
+    const mimeTypes = {
+        ".png": "image/png",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".gif": "image/gif",
+        ".svg": "image/svg+xml",
+        ".webp": "image/webp"
+    };
+
+    if (request.method === "GET" && url.pathname.startsWith("/assets/")) {
+        const assetsDir = path.join(__dirname, "assets");
+        const filePath = path.join(__dirname, decodeURIComponent(url.pathname));
+
+        // Block ../ path traversal
+        if (!filePath.startsWith(assetsDir + path.sep)) {
+            response.writeHead(403, { "Content-Type": "text/plain; charset=utf-8" });
+            response.end("Forbidden");
+            return;
+        }
+
+        fs.readFile(filePath, (error, content) => {
+            if (error) {
+                response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+                response.end("Nincs ilyen fájl.");
+                return;
+            }
+            const ext = path.extname(filePath).toLowerCase();
+            response.writeHead(200, { "Content-Type": mimeTypes[ext] || "application/octet-stream" });
+            response.end(content);
+        });
+        return;
+    }
+
     if (request.method === "GET" && url.pathname === "/") {
         fs.readFile(path.join(__dirname, "index.html"), (error, content) => {
             if (error) {
@@ -269,12 +308,60 @@ const server = http.createServer((request, response) => {
         });
         return;
     }
+
+    
+if (request.method === "GET" && (
+    url.pathname === "/" ||
+    url.pathname === "/index.html" ||
+    url.pathname === "/products.html" ||
+    url.pathname === "/trade-in.html" ||
+    url.pathname === "/contact.html"
+)) {
+    const fileName = url.pathname === "/" ? "index.html" : url.pathname.substring(1);
+
+    fs.readFile(path.join(__dirname, fileName), (error, content) => {
+        if (error) {
+            response.writeHead(500, { "Content-Type": "text/plain; charset=utf-8" });
+            response.end("A felület fájljai most nem érhetők el.");
+            return;
+        }
+
+        response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+        response.end(content);
+    });
+    return;
+}
+
+
     if (request.method === "GET" && url.pathname === ("/api/products")) {
         response.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
         response.end(JSON.stringify(products));
         return;
     }
 
+    // ADDED: working sort handler (answers first, so the old block below never runs)
+    if (request.method === "GET" && url.pathname.startsWith("/api/orderby/")) {
+        const sort = url.pathname.split("/")[3];
+        const sorted = [...products]; // copy, so the original order isn't changed
+
+        if (sort === "name-asc") {
+            sorted.sort((a, b) => a.name.localeCompare(b.name));
+        } else if (sort === "price-asc") {
+            sorted.sort((a, b) => a.price - b.price);
+        } else if (sort === "price-desc") {
+            sorted.sort((a, b) => b.price - a.price);
+        } else {
+            response.writeHead(400, { "Content-Type": "application/json; charset=utf-8" });
+            response.end(JSON.stringify({ error: "Ismeretlen rendezés." }));
+            return;
+        }
+
+        response.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+        response.end(JSON.stringify(sorted));
+        return;
+    }
+
+    // Your original handler (kept untouched; it is never reached now)
     if (request.method === "GET" && url.pathname.startsWith("/api/orderby/")) {
 
         let sortbyname = 'name-asc';
